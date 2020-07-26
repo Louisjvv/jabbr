@@ -1,8 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:jabbr/helper/constants.dart';
-import 'package:jabbr/helper/helperfunctions.dart';
-import 'package:jabbr/models/user.dart';
 import 'package:jabbr/services/auth.dart';
 import 'package:jabbr/services/database.dart';
 import 'package:jabbr/views/chat.dart';
@@ -29,20 +28,24 @@ class _StartupState extends State<Startup> {
 
       await authService.signUpAnonymously().then((result) async {
         if (result != null) {
+          Constants.uid = result.uid;
+          QuerySnapshot userInfoSnapshot =
+          await DatabaseMethods().getUserInfo(Constants.uid);
 
           Constants.myName = usernameEditingController.text;
-
           Map<String, String> userData = {
             'userName' : Constants.myName,
-            'uid' : result.uid,
+            'uid' : Constants.uid,
+            'status' : 'online',
           };
 
-          databaseMethods.addUserInfo(userData);
-
-          HelperFunctions.saveUserLoggedInSharedPreference(true);
-          HelperFunctions.saveUserNameSharedPreference(
-              usernameEditingController.text
-          );
+          if(userInfoSnapshot.documents.isEmpty) {
+            DocumentReference docRef = await databaseMethods.addUserInfo(userData);
+            Constants.docId = docRef.documentID;
+          } else {
+            Constants.docId = userInfoSnapshot.documents[0].documentID;
+            databaseMethods.updateUserInfo(Constants.docId, userData);
+          }
 
           Navigator.pushReplacement(context, MaterialPageRoute(
               builder: (context) => Chat()

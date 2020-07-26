@@ -6,34 +6,6 @@ Widget mainBar(BuildContext context) {
   );
 }
 
-Widget chatBar(BuildContext context) {
-  return AppBar(
-    title: Container(
-        child: Row(
-          children: [
-            Text('Chat'),
-            Spacer(),
-            GestureDetector(
-              onTap: () {
-                //TODO
-              },
-              child: Container(
-                  height: 45,
-                  width: 45,
-                  decoration: BoxDecoration(
-                      color: Colors.blueGrey,
-                      borderRadius: BorderRadius.circular(40)
-                  ),
-                  padding: EdgeInsets.all(2),
-                  child: Image.asset("assets/images/online.png",
-                    height: 40, width: 40,)),
-            ),
-          ],
-        ),
-    ),
-  );
-}
-
 InputDecoration nameInputField(String name) {
   return InputDecoration(
     hintText: name,

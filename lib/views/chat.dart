@@ -6,17 +6,14 @@ import 'package:flutter/material.dart';
 import 'package:jabbr/widgets/appBanner.dart';
 
 class Chat extends StatefulWidget {
-  final String chatRoomId;
-
-  Chat({this.chatRoomId});
-
   @override
   _ChatState createState() => _ChatState();
 }
 
 class _ChatState extends State<Chat> {
-
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   Stream<QuerySnapshot> chats;
+  Stream<QuerySnapshot> users;
   TextEditingController messageEditingController = new TextEditingController();
 
   Widget chatMessages(){
@@ -28,9 +25,25 @@ class _ChatState extends State<Chat> {
             itemBuilder: (context, index){
               return MessageTile(
                 message: snapshot.data.documents[index].data["message"],
-                sendByMe: Constants.myName == snapshot.data.documents[index].data["sendBy"],
-                sentBy: snapshot.data.documents[index].data["sendBy"],
+                sentByMe: Constants.myName == snapshot.data.documents[index].data["sentBy"],
+                sentBy: snapshot.data.documents[index].data["sentBy"],
               );
+            }) : Container();
+      },
+    );
+  }
+
+  Widget onlineUsers(){
+    return StreamBuilder(
+      stream: users,
+      builder: (context, snapshot){
+        return snapshot.hasData ?  ListView.builder(
+            shrinkWrap: true,
+            itemCount: snapshot.data.documents.length,
+            itemBuilder: (context, index){
+              return snapshot.data.documents[index].data["status"] == "online" ? UserNameTile(
+                userName: snapshot.data.documents[index].data["userName"],
+              ) : Container();
             }) : Container();
       },
     );
@@ -39,7 +52,7 @@ class _ChatState extends State<Chat> {
   addMessage() {
     if (messageEditingController.text.isNotEmpty) {
       Map<String, dynamic> chatMessageMap = {
-        "sendBy": Constants.myName,
+        "sentBy": Constants.myName,
         "message": messageEditingController.text,
         'time': DateTime
             .now()
@@ -61,13 +74,34 @@ class _ChatState extends State<Chat> {
         chats = val;
       });
     });
+    DatabaseMethods().getOnlineUsers().then((val) {
+      setState(() {
+        users = val;
+      });
+    });
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: chatBar(context),
+    return new Scaffold(
+      key: _scaffoldKey,
+      appBar: AppBar(
+          title: Text("Chat"),
+          leading: IconButton(
+              icon: Container(
+                  height: 45,
+                  width: 45,
+                  decoration: BoxDecoration(
+                      color: Colors.blueGrey,
+                      borderRadius: BorderRadius.circular(40)
+                  ),
+                  padding: EdgeInsets.all(2),
+                  child: Image.asset("assets/images/online.png",
+                    height: 40, width: 40,)),
+              onPressed: () => _scaffoldKey.currentState.openDrawer())
+      ),
+
       body: Container(
         child: Stack(
           children: [
@@ -128,17 +162,84 @@ class _ChatState extends State<Chat> {
           ],
         ),
       ),
+        drawer: new Drawer(
+          child: Container(
+            color: Color(0xff2e3944),
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+              Container(
+                height: 100.0,
+                child: DrawerHeader(
+                  child: Text('Online', style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.lightGreen,
+                  ),
+                ),
+              ),
+                Container(
+                  child: Stack(
+                    children: [
+                      onlineUsers()
+                    ],
+                  ),
+                ),
+            ],
+        ),
+          ),
+      ),
     );
   }
 
 }
 
+class UserNameTile extends StatelessWidget {
+  final String userName;
+
+  UserNameTile({@required this.userName});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        padding: EdgeInsets.only(
+            top: 8,
+            bottom: 8,
+            left: 8,
+            right: 8),
+        alignment: Alignment.centerLeft,
+        child: Container(
+          margin: EdgeInsets.only(right: 30),
+          padding: EdgeInsets.only(
+              top: 17, bottom: 17, left: 20, right: 20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.all(Radius.circular(23)),
+            color: Color(0xff007EF4)),
+          child: Column (
+              children: [
+                Text(userName,
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontFamily: 'OverpassRegular',
+                        fontWeight: FontWeight.bold)),
+              ]
+          ),
+        )
+    );
+  }
+}
+
 class MessageTile extends StatelessWidget {
   final String message;
-  final bool sendByMe;
+  final bool sentByMe;
   final String sentBy;
 
-  MessageTile({@required this.message, @required this.sendByMe, @required this.sentBy});
+  MessageTile({@required this.message, @required this.sentByMe, @required this.sentBy});
 
 
   @override
@@ -147,17 +248,17 @@ class MessageTile extends StatelessWidget {
       padding: EdgeInsets.only(
           top: 8,
           bottom: 8,
-          left: sendByMe ? 0 : 24,
-          right: sendByMe ? 24 : 0),
-      alignment: sendByMe ? Alignment.centerRight : Alignment.centerLeft,
+          left: sentByMe ? 0 : 24,
+          right: sentByMe ? 24 : 0),
+      alignment: sentByMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        margin: sendByMe
+        margin: sentByMe
             ? EdgeInsets.only(left: 30)
             : EdgeInsets.only(right: 30),
         padding: EdgeInsets.only(
             top: 17, bottom: 17, left: 20, right: 20),
         decoration: BoxDecoration(
-            borderRadius: sendByMe ? BorderRadius.only(
+            borderRadius: sentByMe ? BorderRadius.only(
                 topLeft: Radius.circular(23),
                 topRight: Radius.circular(23),
                 bottomLeft: Radius.circular(23)
@@ -166,7 +267,7 @@ class MessageTile extends StatelessWidget {
                 topLeft: Radius.circular(23),
                 topRight: Radius.circular(23),
                 bottomRight: Radius.circular(23)),
-            color: sendByMe ? const Color(0xff007EF4) : const Color(0xffBFBFBF),
+            color: sentByMe ? const Color(0xff007EF4) : const Color(0xffBFBFBF),
             ),
         child: Column (
             children: [
@@ -181,7 +282,7 @@ class MessageTile extends StatelessWidget {
               Text(message,
                   textAlign: TextAlign.justify,
                   style: TextStyle(
-                    color: sendByMe? Colors.white : Colors.black,
+                    color: sentByMe? Colors.white : Colors.black,
                     fontSize: 16,
                     fontFamily: 'OverpassRegular',
                     fontWeight: FontWeight.w300)),

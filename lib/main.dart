@@ -3,10 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:jabbr/views/chat.dart';
+import 'package:jabbr/services/database.dart';
 import 'package:jabbr/views/startup.dart';
-
-import 'helper/helperfunctions.dart';
+import 'helper/constants.dart';
 
 void main() => runApp(JabbrMain());
 
@@ -15,25 +14,22 @@ class JabbrMain extends StatefulWidget {
   _JabbrMainState createState() => _JabbrMainState();
 }
 
-class _JabbrMainState extends State<JabbrMain> {
-
-//  bool userIsLoggedIn;
-//
-//  @override
-//  void initState() {
-//    getLoggedInState();
-//    super.initState();
-//  }
-//
-//  getLoggedInState() async {
-//    await HelperFunctions.getUserLoggedInSharedPreference().then((value){
-//      setState(() {
-//        userIsLoggedIn  = value;
-//      });
-//    });
-//  }
-
+class _JabbrMainState extends State<JabbrMain> with WidgetsBindingObserver{
+  DatabaseMethods databaseMethods = new DatabaseMethods();
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      databaseMethods.updateStatus(Constants.docId, 'online');
+    }
+    else {
+      databaseMethods.updateStatus(Constants.docId, 'offline');
+    }
+  }
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Jabbr - Chat securely',
@@ -43,12 +39,7 @@ class _JabbrMainState extends State<JabbrMain> {
         primarySwatch: Colors.lightGreen,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-//        home: userIsLoggedIn != null ?  userIsLoggedIn ? Chat() : Startup()
-//            : Container(
-//            child: Center(
-      home: Startup(),
+        home: Startup()
     );
-//        )
-//    );
   }
 }
