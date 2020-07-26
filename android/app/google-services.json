@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "980515766985",
+    "firebase_url": "https://jabbr-66d15.firebaseio.com",
+    "project_id": "jabbr-66d15",
+    "storage_bucket": "jabbr-66d15.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:980515766985:android:9d4df242d7ffcf54608318",
+        "android_client_info": {
+          "package_name": "com.example.jabbr"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "980515766985-istdr29hhmgdic7d8g0b48qes5tmm61n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAzXG0RKCWN9kCkKWwFI-ioyzX_Qb3ZdNQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "980515766985-istdr29hhmgdic7d8g0b48qes5tmm61n.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
