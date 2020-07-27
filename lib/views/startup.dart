@@ -1,11 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:jabbr/helper/constants.dart';
 import 'package:jabbr/services/auth.dart';
 import 'package:jabbr/services/database.dart';
 import 'package:jabbr/views/chat.dart';
-import 'package:jabbr/widgets/appBanner.dart';
+import 'package:jabbr/widgets/decorations.dart';
 
 class Startup extends StatefulWidget {
   @override
@@ -13,38 +12,39 @@ class Startup extends StatefulWidget {
 }
 
 class _StartupState extends State<Startup> {
-  TextEditingController usernameEditingController = new TextEditingController();
   AuthService authService = new AuthService();
   DatabaseMethods databaseMethods = new DatabaseMethods();
+  TextEditingController usernameEditingController = new TextEditingController();
 
   final formKey = GlobalKey<FormState>();
-  bool isLoading = false;
+  bool loading = false;
 
   startUp() async {
     if (formKey.currentState.validate()) {
       setState(() {
-        isLoading = true;
+        loading = true;
       });
 
       await authService.signUpAnonymously().then((result) async {
         if (result != null) {
-          Constants.uid = result.uid;
+          Constants.myUid = result.uid;
           QuerySnapshot userInfoSnapshot =
-          await DatabaseMethods().getUserInfo(Constants.uid);
+          await DatabaseMethods().getUserInfo(Constants.myUid);
 
-          Constants.myName = usernameEditingController.text;
+          Constants.myUserName = usernameEditingController.text;
           Map<String, String> userData = {
-            'userName' : Constants.myName,
-            'uid' : Constants.uid,
-            'status' : 'online',
+            'userName': Constants.myUserName,
+            'uid': Constants.myUid,
+            'status': 'online',
           };
 
-          if(userInfoSnapshot.documents.isEmpty) {
-            DocumentReference docRef = await databaseMethods.addUserInfo(userData);
-            Constants.docId = docRef.documentID;
+          if (userInfoSnapshot.documents.isEmpty) {
+            DocumentReference docRef = await databaseMethods.addUserInfo(
+                userData);
+            Constants.myDocId = docRef.documentID;
           } else {
-            Constants.docId = userInfoSnapshot.documents[0].documentID;
-            databaseMethods.updateUserInfo(Constants.docId, userData);
+            Constants.myDocId = userInfoSnapshot.documents[0].documentID;
+            databaseMethods.updateUserInfo(Constants.myDocId, userData);
           }
 
           Navigator.pushReplacement(context, MaterialPageRoute(
@@ -59,7 +59,7 @@ class _StartupState extends State<Startup> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: mainBar(context),
-      body: isLoading ? Container(
+      body: loading ? Container(
         child: Center(child: CircularProgressIndicator(),),) : Container(
         padding: EdgeInsets.symmetric(horizontal: 24.0),
         child: Column(

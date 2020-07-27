@@ -1,6 +1,6 @@
 class Constants{
 
-  static String myName = "";
-  static String uid = "";
-  static String docId = "";
+  static String myUserName = "";
+  static String myUid = "";
+  static String myDocId = "";
 }

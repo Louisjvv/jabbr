@@ -1,9 +1,11 @@
 import 'dart:io';
-import 'package:jabbr/helper/constants.dart';
-import 'package:jabbr/services/database.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:jabbr/widgets/appBanner.dart';
+
+import 'package:jabbr/helper/constants.dart';
+import 'package:jabbr/helper/decorations.dart';
+import 'package:jabbr/services/database.dart';
 
 class Chat extends StatefulWidget {
   @override
@@ -16,43 +18,10 @@ class _ChatState extends State<Chat> {
   Stream<QuerySnapshot> users;
   TextEditingController messageEditingController = new TextEditingController();
 
-  Widget chatMessages(){
-    return StreamBuilder(
-      stream: chats,
-      builder: (context, snapshot){
-        return snapshot.hasData ?  ListView.builder(
-            itemCount: snapshot.data.documents.length,
-            itemBuilder: (context, index){
-              return MessageTile(
-                message: snapshot.data.documents[index].data["message"],
-                sentByMe: Constants.myName == snapshot.data.documents[index].data["sentBy"],
-                sentBy: snapshot.data.documents[index].data["sentBy"],
-              );
-            }) : Container();
-      },
-    );
-  }
-
-  Widget onlineUsers(){
-    return StreamBuilder(
-      stream: users,
-      builder: (context, snapshot){
-        return snapshot.hasData ?  ListView.builder(
-            shrinkWrap: true,
-            itemCount: snapshot.data.documents.length,
-            itemBuilder: (context, index){
-              return snapshot.data.documents[index].data["status"] == "online" ? UserNameTile(
-                userName: snapshot.data.documents[index].data["userName"],
-              ) : Container();
-            }) : Container();
-      },
-    );
-  }
-
   addMessage() {
     if (messageEditingController.text.isNotEmpty) {
       Map<String, dynamic> chatMessageMap = {
-        "sentBy": Constants.myName,
+        "sentBy": Constants.myUserName,
         "message": messageEditingController.text,
         'time': DateTime
             .now()
@@ -94,23 +63,19 @@ class _ChatState extends State<Chat> {
                   width: 45,
                   decoration: BoxDecoration(
                       color: Colors.blueGrey,
-                      borderRadius: BorderRadius.circular(40)
-                  ),
+                      borderRadius: BorderRadius.circular(40)),
                   padding: EdgeInsets.all(2),
                   child: Image.asset("assets/images/online.png",
-                    height: 40, width: 40,)),
-              onPressed: () => _scaffoldKey.currentState.openDrawer())
-      ),
-
+                    height: 40,
+                    width: 40)),
+              onPressed: () => _scaffoldKey.currentState.openDrawer())),
       body: Container(
         child: Stack(
           children: [
             chatMessages(),
-            Container(alignment: Alignment.bottomCenter,
-              width: MediaQuery
-                  .of(context)
-                  .size
-                  .width,
+            Container(
+              alignment: Alignment.bottomCenter,
+              width: MediaQuery.of(context).size.width,
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 24, vertical: 24),
                 color: Color(0x54FFFFFF),
@@ -121,16 +86,13 @@ class _ChatState extends State<Chat> {
                           controller: messageEditingController,
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 16,
-                          ),
+                            fontSize: 16),
                           decoration: InputDecoration(
                               hintText: "Type a message",
                               hintStyle: TextStyle(
                                 color: Colors.white,
-                                fontSize: 16,
-                              ),
-                              border: InputBorder.none
-                          ),
+                                fontSize: 16),
+                              border: InputBorder.none),
                         )),
                     SizedBox(width: 16,),
                     GestureDetector(
@@ -164,7 +126,7 @@ class _ChatState extends State<Chat> {
       ),
         drawer: new Drawer(
           child: Container(
-            color: Color(0xff2e3944),
+            color: Color(0xff2E3944),
             child: ListView(
               padding: EdgeInsets.zero,
               children: [
@@ -173,14 +135,9 @@ class _ChatState extends State<Chat> {
                 child: DrawerHeader(
                   child: Text('Online', style: TextStyle(
                     fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  ),
+                    fontWeight: FontWeight.bold)),
                   decoration: BoxDecoration(
-                    color: Colors.lightGreen,
-                  ),
-                ),
-              ),
+                    color: Colors.lightGreen))),
                 Container(
                   child: Stack(
                     children: [
@@ -188,10 +145,10 @@ class _ChatState extends State<Chat> {
                     ],
                   ),
                 ),
-            ],
-        ),
+              ],
+            ),
           ),
-      ),
+        ),
     );
   }
 
@@ -205,16 +162,11 @@ class UserNameTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        padding: EdgeInsets.only(
-            top: 8,
-            bottom: 8,
-            left: 8,
-            right: 8),
+        padding: EdgeInsets.only(top: 8, bottom: 8, left: 8, right: 8),
         alignment: Alignment.centerLeft,
         child: Container(
           margin: EdgeInsets.only(right: 30),
-          padding: EdgeInsets.only(
-              top: 17, bottom: 17, left: 20, right: 20),
+          padding: EdgeInsets.only(top: 17, bottom: 17, left: 20, right: 20),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(23)),
             color: Color(0xff007EF4)),
@@ -239,7 +191,11 @@ class MessageTile extends StatelessWidget {
   final bool sentByMe;
   final String sentBy;
 
-  MessageTile({@required this.message, @required this.sentByMe, @required this.sentBy});
+  MessageTile({
+    @required this.message,
+    @required this.sentByMe,
+    @required this.sentBy
+  });
 
 
   @override

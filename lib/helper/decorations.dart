@@ -1,11 +1,5 @@
 import 'package:flutter/material.dart';
 
-Widget mainBar(BuildContext context) {
-  return AppBar(
-    title: Text('Jabbr'),
-  );
-}
-
 InputDecoration nameInputField(String name) {
   return InputDecoration(
     hintText: name,
