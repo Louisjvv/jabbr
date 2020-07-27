@@ -24,10 +24,10 @@ class _JabbrMainState extends State<JabbrMain> with WidgetsBindingObserver{
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      databaseMethods.updateStatus(Constants.docId, 'online');
+      databaseMethods.updateStatus(Constants.myDocId, 'online');
     }
     else {
-      databaseMethods.updateStatus(Constants.docId, 'offline');
+      databaseMethods.updateStatus(Constants.myDocId, 'offline');
     }
   }
   Widget build(BuildContext context) {

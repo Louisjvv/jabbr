@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DatabaseMethods {
-  Future<DocumentReference> addUserInfo(userData) async {
+  Future<DocumentReference> addNewUserInfo(userData) async {
     return await Firestore.instance.collection("users").add(userData).catchError((e) {
       print(e.toString());
     });

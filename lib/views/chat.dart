@@ -1,10 +1,7 @@
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import 'package:jabbr/helper/constants.dart';
-import 'package:jabbr/helper/decorations.dart';
 import 'package:jabbr/services/database.dart';
 
 class Chat extends StatefulWidget {
@@ -17,6 +14,43 @@ class _ChatState extends State<Chat> {
   Stream<QuerySnapshot> chats;
   Stream<QuerySnapshot> users;
   TextEditingController messageEditingController = new TextEditingController();
+  ScrollController _scrollController = new ScrollController();
+
+  Widget chatMessages(){
+    return StreamBuilder(
+      stream: chats,
+      builder: (context, snapshot){
+        return snapshot.hasData ?  ListView.builder(
+            padding: EdgeInsets.only(bottom: 180.0),
+            shrinkWrap: true,
+            controller: _scrollController,
+            itemCount: snapshot.data.documents.length,
+            itemBuilder: (context, index){
+              return MessageTile(
+                message: snapshot.data.documents[index].data["message"],
+                sentByMe: Constants.myUserName == snapshot.data.documents[index].data["sentBy"],
+                sentBy: snapshot.data.documents[index].data["sentBy"],
+              );
+            }) : Container();
+      },
+    );
+  }
+
+  Widget onlineUsers() {
+    return StreamBuilder(
+      stream: users,
+      builder: (context, snapshot){
+        return snapshot.hasData ?  ListView.builder(
+            shrinkWrap: true,
+            itemCount: snapshot.data.documents.length,
+            itemBuilder: (context, index){
+              return snapshot.data.documents[index].data["status"] == "online" ? UserNameTile(
+                userName: snapshot.data.documents[index].data["userName"],
+              ) : Container();
+            }) : Container();
+      },
+    );
+  }
 
   addMessage() {
     if (messageEditingController.text.isNotEmpty) {
@@ -41,6 +75,11 @@ class _ChatState extends State<Chat> {
     DatabaseMethods().getChats().then((val) {
       setState(() {
         chats = val;
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent + 1,
+          curve: Curves.easeOut,
+          duration: const Duration(milliseconds: 300),
+        );
       });
     });
     DatabaseMethods().getOnlineUsers().then((val) {
@@ -74,6 +113,10 @@ class _ChatState extends State<Chat> {
           children: [
             chatMessages(),
             Container(
+              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+              child: SizedBox(height: 16.0),
+            ),
+            Container(
               alignment: Alignment.bottomCenter,
               width: MediaQuery.of(context).size.width,
               child: Container(
@@ -98,6 +141,11 @@ class _ChatState extends State<Chat> {
                     GestureDetector(
                       onTap: () {
                         addMessage();
+                        _scrollController.animateTo(
+                          _scrollController.position.maxScrollExtent,
+                          curve: Curves.easeOut,
+                          duration: const Duration(milliseconds: 300),
+                        );
                       },
                       child: Container(
                           height: 40,

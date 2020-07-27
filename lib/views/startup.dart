@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+
+import 'package:jabbr/helper/decorations.dart';
 import 'package:jabbr/helper/constants.dart';
+import 'package:jabbr/helper/widgets.dart';
 import 'package:jabbr/services/auth.dart';
 import 'package:jabbr/services/database.dart';
 import 'package:jabbr/views/chat.dart';
-import 'package:jabbr/widgets/decorations.dart';
 
 class Startup extends StatefulWidget {
   @override
@@ -39,7 +41,7 @@ class _StartupState extends State<Startup> {
           };
 
           if (userInfoSnapshot.documents.isEmpty) {
-            DocumentReference docRef = await databaseMethods.addUserInfo(
+            DocumentReference docRef = await databaseMethods.addNewUserInfo(
                 userData);
             Constants.myDocId = docRef.documentID;
           } else {
